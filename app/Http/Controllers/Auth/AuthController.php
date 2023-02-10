@@ -22,6 +22,18 @@ class AuthController extends Controller
 
         $credentials = $request->only('email', 'password');
 
+        $user = User::where('email' , $credentials['email'])->first();
+
+        if($user->status != 1)
+        {
+            return response(
+                json_encode([
+                    'status' => 'error, user has ben block',
+                    'message' => 'Unauthorized',
+                ]),401
+            ); 
+        }
+
         $token = Auth::attempt($credentials);
         if (!$token) {
             return response(
@@ -47,6 +59,19 @@ class AuthController extends Controller
     }
 
     public function register(RegisterRequest $request){
+        
+        $user = Auth::user();
+
+        if($user->type != 1)
+        {
+            return response(json_encode([
+                [
+                    'status' => 'error',
+                    'message' => 'User not created, unauthorized',
+                    
+                ]
+            ]), 401);
+        }
 
         $user = User::create([
             'name' => $request->name,
@@ -92,5 +117,102 @@ class AuthController extends Controller
                 ]
             ]
         ));
+    }
+
+    public function validToken()
+    {
+        return response(json_encode(
+            [
+                'status' => 'success',
+                'user' => Auth::user(),
+                'valid' => true 
+            ]
+        ));
+    }
+
+    public function accountBlock(int $id) 
+    {
+        $userreq = Auth::user();
+
+        if($userreq->type != 1)
+        {
+            return response(json_encode([
+                [
+                    'status' => 'error',
+                    'message' => 'User not blocked, unauthorized',
+                    
+                ]
+            ]), 401);
+        }
+
+        $userblock = User::find($id);
+
+        if(!$userblock)
+        {
+            return response(json_encode([
+                [
+                    'status' => 'error',
+                    'message' => 'User not found',
+                    
+                ]
+            ]), 404);
+        }
+
+        $userblock->status = 0;
+        $userblock->save();
+
+        return response(json_encode([
+            [
+                'status' => 'success',
+                'message' => 'User'.$userblock->name.' block with success!',
+                
+            ]
+        ]), 201);
+
+
+
+    }
+
+
+    public function unblockUser($id)
+    {
+
+        $userreq = Auth::user();
+
+        if($userreq->type != 1)
+        {
+            return response(json_encode([
+                [
+                    'status' => 'error',
+                    'message' => 'User not unblock, unauthorized',
+                    
+                ]
+            ]), 401);
+        }
+
+        $userblock = User::find($id);
+
+        if(!$userblock)
+        {
+            return response(json_encode([
+                [
+                    'status' => 'error',
+                    'message' => 'User not found',
+                    
+                ]
+            ]), 404);
+        }
+
+        $userblock->status = 1;
+        $userblock->save();
+
+        return response(json_encode([
+            [
+                'status' => 'success',
+                'message' => 'User'.$userblock->name.' unblock with success!',
+                
+            ]
+        ]), 201);
+
     }
 }

@@ -6,6 +6,7 @@ use App\Http\Controllers\Auth\AuthController;
 
 Route::controller(AuthController::class)->group(function () {
     Route::post('login', 'login');
+    Route::post('/validtoken' , 'validToken');
     Route::post('register', 'register')->name('register.user');
     Route::post('logout', 'logout');
     Route::post('refresh', 'refresh');

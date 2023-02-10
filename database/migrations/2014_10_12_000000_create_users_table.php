@@ -21,6 +21,9 @@ return new class extends Migration
             $table->string('password');
             $table->rememberToken();
             $table->timestamps();
+            $table->integer('status')->default(0);// 0:block: , 1:active
+            $table->integer('type')->default(0); // 0: dfefault, 1:master
+            
         });
     }
 
